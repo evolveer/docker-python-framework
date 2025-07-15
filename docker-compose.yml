@@ -1,0 +1,96 @@
+# Docker Compose configuration for Python Framework
+# This file provides an alternative way to run the application using docker-compose
+
+version: '3.8'
+
+services:
+  python-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - APP_USER=appuser
+        - APP_UID=1000
+        - APP_GID=1000
+    
+    image: python-app:latest
+    container_name: python-app-container
+    
+    ports:
+      - "${HOST_PORT:-8000}:${PORT:-8000}"
+    
+    environment:
+      - DEBUG=${DEBUG:-False}
+      - PORT=${PORT:-8000}
+      - HOST=0.0.0.0
+      - PYTHONUNBUFFERED=1
+    
+    # Environment file (create .env file for local overrides)
+    env_file:
+      - .env
+    
+    # Restart policy
+    restart: unless-stopped
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:${PORT:-8000}/api/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    # Resource limits (uncomment and adjust as needed)
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '1.0'
+    #       memory: 512M
+    #     reservations:
+    #       cpus: '0.5'
+    #       memory: 256M
+    
+    # Volumes (uncomment if you need persistent data)
+    # volumes:
+    #   - ./data:/app/data
+    #   - ./logs:/app/logs
+    
+    # Networks (uncomment if you need custom networking)
+    # networks:
+    #   - app-network
+
+# Uncomment if you need additional services
+# services:
+#   redis:
+#     image: redis:7-alpine
+#     container_name: python-app-redis
+#     ports:
+#       - "6379:6379"
+#     restart: unless-stopped
+#     networks:
+#       - app-network
+#   
+#   postgres:
+#     image: postgres:15-alpine
+#     container_name: python-app-postgres
+#     environment:
+#       POSTGRES_DB: ${POSTGRES_DB:-appdb}
+#       POSTGRES_USER: ${POSTGRES_USER:-appuser}
+#       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-apppass}
+#     ports:
+#       - "5432:5432"
+#     volumes:
+#       - postgres_data:/var/lib/postgresql/data
+#     restart: unless-stopped
+#     networks:
+#       - app-network
+
+# Uncomment if you need custom networks
+# networks:
+#   app-network:
+#     driver: bridge
+
+# Uncomment if you need persistent volumes
+# volumes:
+#   postgres_data:
+
