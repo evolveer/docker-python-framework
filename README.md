@@ -96,13 +96,13 @@ cp .env.example .env
 # nano .env
 
 # Start the application
-docker-compose up -d
+docker compose up -d
 
 # View logs
-docker-compose logs -f
+docker compose logs -f
 
 # Stop the application
-docker-compose down
+docker compose down
 ```
 
 
